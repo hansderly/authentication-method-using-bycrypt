@@ -32,11 +32,7 @@ app.post('/login', (req, res) => {
 		if (result[0]) {
 			console.log(result[0].password);
 			bycrypt.compare(password, result[0].password, (err, result) => {
-				if(result) {
-					res.render('secrets');
-				} else {
-					console.log('WRONG PASSWORD');				
-				}
+				result ? res.render('secrets') : console.log('WRONG PASSWORD');
 			});
 		} else {
 
