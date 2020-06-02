@@ -25,20 +25,19 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
 	// Infos provid by the user
 	const email = req.body.username;
-	const password = req.body.password;
+	const passwordForm = req.body.password;
 
 	// Find if the user exist
 	let sql = "SELECT * FROM user  WHERE email = '" + email + "'";
 	connexion.query(sql, function (err, result) {
 		if (err) throw err;
 		console.log(result);
-		
+		// If email is in the database
 		if (result[0]) {
-			console.log(result[0].password);
 			// Compare the password that user provide with password in the database
-			bycrypt.compare(password, result[0].password, (err, result) => {
-				result ? res.render('secrets') : console.log('WRONG PASSWORD');
-			});
+			hash = result[0].password;
+			let isPassword = bycrypt.compareSync(passwordForm, hash);
+			isPassword ? res.render('secrets') : console.log('WRONG PASSWORD');
 		} else {
 			console.log('NO USER FOUND');
 			res.redirect('/login');
@@ -59,17 +58,17 @@ app.post('/register', (req, res) => {
 	const saltRounds = 10;
 
 	// hash the password
-	bycrypt.hash(password, saltRounds, (err, hash) => {
-		if(err) throw err;
-		
-		let sql =
-			"INSERT INTO user (email, password) VALUES ('" + email +"','" +hash +"')";
+	const hashPasswsord = bycrypt.hashSync(password, saltRounds);
+	console.log(hashPasswsord);
+	
+
+	let sql = "INSERT INTO user (email, password) VALUES ('" + email + "','" + hashPasswsord + "')";
+
 		connexion.query(sql, function (err, result) {
-			if (err) throw err;
-			console.log(result);
-			res.render('secrets');
-		});
-	});	
+		if (err) throw err;
+		console.log(result);
+		res.render('secrets');
+	});
 });
 
 const PORT = 8080;
